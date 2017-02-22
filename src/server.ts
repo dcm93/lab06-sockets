@@ -1,6 +1,12 @@
 import net = require('net');//import socket module
 import ip = require('ip');
+var clientList:net.Socket[] = [];
 
+var broadcast = function(message:string){
+    clientList.forEach(client => 
+        client.write(message)
+    );
+}
 // define address interface
 interface Address { port: number; family: string; address: string; };
 
@@ -9,7 +15,13 @@ let server:net.Server = net.createServer();
 
 // when the server is connected
 server.on('connection', function(socket:net.Socket){
-
+    function broadcast(name:String, message:String){
+            clientList.forEach(client => {
+                if(client !== socket){
+                    client.write(`[${name}], ${message} \n`);
+                }
+            })
+    }
     // when data is sent to the socket
     socket.on('data', function(data){
         //
